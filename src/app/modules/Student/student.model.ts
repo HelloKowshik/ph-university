@@ -29,13 +29,13 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
 });
 
 const studentSchema = new Schema<TStudent>({
-  id: { type: String },
+  id: { type: String, unique: true },
   name: nameSchema,
   email: { type: String, required: true },
   gender: ["Male", "Female"],
   dateOfBirth: { type: String },
   contactNo: { type: String, required: true },
-  emergenceyContactNo: { type: String, required: true },
+  emergencyContactNo: { type: String, required: true },
   bloodGroup: ["A+", "A-", "B+", "B-", "O-", "O+", "AB+", "AB-"],
   presentAddress: { type: String, required: true },
   permanentAddress: { type: String, required: true },

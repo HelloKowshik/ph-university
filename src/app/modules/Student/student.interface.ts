@@ -38,7 +38,7 @@ export type TStudent = {
   gender: TGender;
   dateOfBirth?: string;
   contactNo: string;
-  emergenceyContactNo: string;
+  emergencyContactNo: string;
   bloodGroup?: TBloodGroup;
   presentAddress: string;
   permanentAddress: string;
