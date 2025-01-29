@@ -1,5 +1,7 @@
 import { Schema, model } from "mongoose";
 import {
+  StudentMethods,
+  StudentModel,
   TGuardian,
   TLocalGuardian,
   TName,
@@ -28,21 +30,36 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
   address: { type: String, required: true },
 });
 
-const studentSchema = new Schema<TStudent>({
-  id: { type: String, unique: true },
-  name: nameSchema,
-  email: { type: String, required: true },
-  gender: ["Male", "Female"],
+const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>({
+  id: { type: String, unique: true, required: true },
+  name: { type: nameSchema, required: true },
+  email: { type: String, required: true, unique: true },
+  gender: {
+    type: String,
+    enum: {
+      values: ["Male", "Female", "Others"],
+      message: "{VALUE} must be Male/Female/Others",
+    },
+    required: true,
+  },
   dateOfBirth: { type: String },
   contactNo: { type: String, required: true },
   emergencyContactNo: { type: String, required: true },
-  bloodGroup: ["A+", "A-", "B+", "B-", "O-", "O+", "AB+", "AB-"],
+  bloodGroup: {
+    type: String,
+    enum: ["A+", "A-", "B+", "B-", "O-", "O+", "AB+", "AB-"],
+  },
   presentAddress: { type: String, required: true },
   permanentAddress: { type: String, required: true },
-  guardianInfo: guardianInfoSchema,
-  localGuardian: localGuardianSchema,
+  guardianInfo: { type: guardianInfoSchema, required: true },
+  localGuardian: { type: localGuardianSchema, required: true },
   profileImg: { type: String },
-  isActive: ["active", "blocked"],
+  isActive: { type: String, enum: ["active", "blocked"], default: "active" },
 });
 
-export const Student = model<TStudent>("Student", studentSchema);
+studentSchema.methods.isUserExists = async function (id: string) {
+  const existingUser = await Student.findOne({ id });
+  return existingUser;
+};
+
+export const Student = model<TStudent, StudentModel>("Student", studentSchema);

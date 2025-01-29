@@ -1,4 +1,6 @@
-export type TGender = "Male" | "Female";
+import { Model } from "mongoose";
+
+export type TGender = "Male" | "Female" | "Others";
 export type TBloodGroup =
   | "A+"
   | "A-"
@@ -47,3 +49,13 @@ export type TStudent = {
   profileImg?: string;
   isActive: "active" | "blocked";
 };
+
+export type StudentMethods = {
+  isUserExists(id: string): Promise<TStudent | null>;
+};
+
+export type StudentModel = Model<
+  TStudent,
+  Record<string, never>,
+  StudentMethods
+>;
