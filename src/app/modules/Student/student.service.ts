@@ -2,12 +2,10 @@ import { TStudent } from "./student.interface";
 import { Student } from "./student.model";
 
 const createStudentIntoDB = async (payload: TStudent) => {
-  // const result = await Student.create(payload);
-  const student = new Student(payload);
-  if (await student.isUserExists(payload.id)) {
+  if (await Student.isUserExists(payload.id)) {
     throw new Error("User already exists!");
   }
-  const result = await student.save();
+  const result = await Student.create(payload);
   return result;
 };
 
@@ -21,8 +19,14 @@ const getSingleStudentFromDB = async (id: string) => {
   return result;
 };
 
+const deleteStudentFromDB = async (id: string) => {
+  const result = await Student.updateOne({ id }, { isDeleted: true });
+  return result;
+};
+
 export const StudentServices = {
   createStudentIntoDB,
   getAllStudentsFromDB,
   getSingleStudentFromDB,
+  deleteStudentFromDB,
 };
