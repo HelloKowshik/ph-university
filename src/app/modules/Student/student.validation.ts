@@ -49,56 +49,65 @@ const localGuardianValidationSchema = z.object({
     .min(1, { message: "Local guardian's address is required" }),
 });
 
-const studentValidationSchema = z
-  .object({
-    id: z.string().min(1, { message: "ID is required" }),
-    password: z.string().min(5, { message: "Minimum 5 character must" }),
-    name: nameValidationSchema,
-    email: z.string().email({ message: "Invalid email format" }),
-    gender: z.enum(["Male", "Female", "Others"], {
-      errorMap: () => ({ message: "Gender must be Male, Female, or Others" }),
-    }),
-    dateOfBirth: z
+const createStudentValidationSchema = z.object({
+  body: z.object({
+    password: z
       .string()
-      .optional()
-      .refine((val) => !val || /^\d{4}-\d{2}-\d{2}$/.test(val), {
-        message: "Date of birth must be in YYYY-MM-DD format",
-      }),
-    contactNo: z
-      .string()
-      .min(11, { message: "Contact number must be at least 11 digits" })
-      .max(11, { message: "Contact number cannot exceed 11 digits" })
-      .refine((val) => /^[0-9]+$/.test(val), {
-        message: "Contact number must contain only numbers",
-      }),
-    emergencyContactNo: z
-      .string()
-      .min(11, {
-        message: "Emergency contact number must be at least 10 digits",
-      })
-      .max(15, { message: "Emergency contact number cannot exceed 11 digits" })
-      .refine((val) => /^[0-9]+$/.test(val), {
-        message: "Emergency contact number must contain only numbers",
-      }),
-    bloodGroup: z
-      .enum(["A+", "A-", "B+", "B-", "O-", "O+", "AB+", "AB-"])
+      .min(5, { message: "Minimum 5 character must" })
       .optional(),
-    presentAddress: z
-      .string()
-      .min(1, { message: "Present address is required" }),
-    permanentAddress: z
-      .string()
-      .min(1, { message: "Permanent address is required" }),
-    guardianInfo: guardianValidationSchema,
-    localGuardian: localGuardianValidationSchema,
-    profileImg: z.string().url({ message: "Invalid URL format" }).optional(),
-    isActive: z.enum(["active", "blocked"]).default("active"),
-    isDeleted: z.boolean().default(false),
-  })
-  .refine((data) => data.contactNo !== data.emergencyContactNo, {
-    message:
-      "Emergency contact number must be different from the primary contact number",
-    path: ["emergencyContactNo"],
-  });
+    student: z
+      .object({
+        name: nameValidationSchema,
+        email: z.string().email({ message: "Invalid email format" }),
+        gender: z.enum(["Male", "Female", "Others"], {
+          errorMap: () => ({
+            message: "Gender must be Male, Female, or Others",
+          }),
+        }),
+        dateOfBirth: z.string().optional(),
+        contactNo: z
+          .string()
+          .min(11, { message: "Contact number must be at least 11 digits" })
+          .max(11, { message: "Contact number cannot exceed 11 digits" })
+          .refine((val) => /^[0-9]+$/.test(val), {
+            message: "Contact number must contain only numbers",
+          }),
+        emergencyContactNo: z
+          .string()
+          .min(11, {
+            message: "Emergency contact number must be at least 10 digits",
+          })
+          .max(15, {
+            message: "Emergency contact number cannot exceed 11 digits",
+          })
+          .refine((val) => /^[0-9]+$/.test(val), {
+            message: "Emergency contact number must contain only numbers",
+          }),
+        bloodGroup: z
+          .enum(["A+", "A-", "B+", "B-", "O-", "O+", "AB+", "AB-"])
+          .optional(),
+        presentAddress: z
+          .string()
+          .min(1, { message: "Present address is required" }),
+        permanentAddress: z
+          .string()
+          .min(1, { message: "Permanent address is required" }),
+        guardianInfo: guardianValidationSchema,
+        localGuardian: localGuardianValidationSchema,
+        admissionSemester: z.string(),
+        profileImg: z
+          .string()
+          .url({ message: "Invalid URL format" })
+          .optional(),
+      })
+      .refine((data) => data.contactNo !== data.emergencyContactNo, {
+        message:
+          "Emergency contact number must be different from the primary contact number",
+        path: ["emergencyContactNo"],
+      }),
+  }),
+});
 
-export default studentValidationSchema;
+export const studentValidations = {
+  createStudentValidationSchema,
+};

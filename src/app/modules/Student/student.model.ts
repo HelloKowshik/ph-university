@@ -6,8 +6,6 @@ import {
   TName,
   TStudent,
 } from "./student.interface";
-import bcrypt from "bcrypt";
-import config from "../../config";
 
 const nameSchema = new Schema<TName>({
   firstName: { type: String, required: true },
@@ -34,10 +32,11 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
 const studentSchema = new Schema<TStudent, StudentModel>(
   {
     id: { type: String, unique: true, required: true },
-    password: {
-      type: String,
-      required: true,
-      minlength: [5, "Minimum 5 character"],
+    user: {
+      type: Schema.Types.ObjectId,
+      unique: true,
+      required: [true, "user is required"],
+      ref: "User",
     },
     name: { type: nameSchema, required: true },
     email: { type: String, required: true, unique: true },
@@ -60,8 +59,8 @@ const studentSchema = new Schema<TStudent, StudentModel>(
     permanentAddress: { type: String, required: true },
     guardianInfo: { type: guardianInfoSchema, required: true },
     localGuardian: { type: localGuardianSchema, required: true },
+    admissionSemester: { type: Schema.Types.ObjectId, ref: "AcademicSemester" },
     profileImg: { type: String },
-    isActive: { type: String, enum: ["active", "blocked"], default: "active" },
     isDeleted: { type: Boolean, default: false },
   },
   {
@@ -79,19 +78,6 @@ studentSchema.virtual("fullName").get(function () {
     " " +
     this.name?.lastName
   );
-});
-
-studentSchema.pre("save", async function (next) {
-  this.password = await bcrypt.hash(
-    this.password,
-    Number(config.bcrypt_salt_rounds)
-  );
-  next();
-});
-
-studentSchema.post("save", function (doc, next) {
-  doc.password = "";
-  next();
 });
 
 studentSchema.pre("find", function (next) {
