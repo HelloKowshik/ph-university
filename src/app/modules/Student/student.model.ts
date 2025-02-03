@@ -6,6 +6,8 @@ import {
   TName,
   TStudent,
 } from "./student.interface";
+import AppError from "../../errors/AppError";
+import status from "http-status";
 
 const nameSchema = new Schema<TName>({
   firstName: { type: String, required: true },
@@ -60,6 +62,11 @@ const studentSchema = new Schema<TStudent, StudentModel>(
     guardianInfo: { type: guardianInfoSchema, required: true },
     localGuardian: { type: localGuardianSchema, required: true },
     admissionSemester: { type: Schema.Types.ObjectId, ref: "AcademicSemester" },
+    academicDepartment: {
+      type: Schema.Types.ObjectId,
+      ref: "AcademicDepartment",
+    },
+    academicFaculty: { type: Schema.Types.ObjectId, ref: "AcademicFaculty" },
     profileImg: { type: String },
     isDeleted: { type: Boolean, default: false },
   },
@@ -92,6 +99,15 @@ studentSchema.pre("findOne", function (next) {
 
 studentSchema.pre("aggregate", function (next) {
   this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
+  next();
+});
+
+studentSchema.pre("updateOne", async function (next) {
+  const query = this.getQuery();
+  const isStudentExists = await Student.findById(query);
+  if (!isStudentExists) {
+    throw new AppError(status.NOT_FOUND, "Student does not exists!");
+  }
   next();
 });
 
