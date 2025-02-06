@@ -79,11 +79,11 @@ const studentSchema = new Schema<TStudent, StudentModel>(
 
 studentSchema.virtual("fullName").get(function () {
   return (
-    this.name?.firstName +
+    this?.name?.firstName +
     " " +
-    this.name?.middleName +
+    this?.name?.middleName +
     " " +
-    this.name?.lastName
+    this?.name?.lastName
   );
 });
 
@@ -102,9 +102,9 @@ studentSchema.pre("aggregate", function (next) {
   next();
 });
 
-studentSchema.pre("updateOne", async function (next) {
+studentSchema.pre("findOneAndUpdate", async function (next) {
   const query = this.getQuery();
-  const isStudentExists = await Student.findById(query);
+  const isStudentExists = await Student.findOne(query);
   if (!isStudentExists) {
     throw new AppError(status.NOT_FOUND, "Student does not exists!");
   }
