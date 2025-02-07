@@ -24,6 +24,7 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
     .sort()
     .paginate()
     .fields();
+
   const result = await studentQuery.modelQuery;
   return result;
 };
@@ -65,7 +66,7 @@ const updateStudentIntoDB = async (id: string, payload: Partial<TStudent>) => {
       modifiedUpdatedData[`localGuardian.${key}`] = value;
     }
   }
-
+  console.log(id);
   const result = await Student.findOneAndUpdate({ id }, modifiedUpdatedData, {
     new: true,
     runValidators: true,

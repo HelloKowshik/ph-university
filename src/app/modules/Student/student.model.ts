@@ -10,9 +10,17 @@ import AppError from "../../errors/AppError";
 import status from "http-status";
 
 const nameSchema = new Schema<TName>({
-  firstName: { type: String, required: true },
+  firstName: {
+    type: String,
+    required: [true, "First Name is required"],
+    trim: true,
+  },
   middleName: { type: String },
-  lastName: { type: String, required: true },
+  lastName: {
+    type: String,
+    required: [true, "Last Name is required"],
+    trim: true,
+  },
 });
 
 const guardianInfoSchema = new Schema<TGuardian>({

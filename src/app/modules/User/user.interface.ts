@@ -1,4 +1,4 @@
-type TRole = "admin" | "student" | "facculty";
+type TRole = "admin" | "student" | "faculty";
 type TStatus = "in-progress" | "blocked";
 
 export type TUser = {
