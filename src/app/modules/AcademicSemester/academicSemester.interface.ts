@@ -1,3 +1,5 @@
+import { Model } from "mongoose";
+
 export type TSemesterName = "Autumn" | "Summar" | "Fall";
 export type TSemesterCoode = "01" | "02" | "03";
 export type TMonth =
