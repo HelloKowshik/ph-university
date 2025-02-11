@@ -16,12 +16,19 @@ import { AcademicDepartment } from "../AcademicDepartment/academicDepartment.mod
 import { Faculty } from "../Faculty/faculty.model";
 import { TAdmin } from "../Admin/admin.interface";
 import { Admin } from "../Admin/admin.model";
+import { JwtPayload } from "jsonwebtoken";
+import { sendImageToCloudinary } from "../../utils/sendImageToCloudinary";
 
-const createStudentIntoDB = async (password: string, payload: TStudent) => {
+const createStudentIntoDB = async (
+  file: any,
+  password: string,
+  payload: TStudent
+) => {
   const user: Partial<TUser> = {};
 
   user.password = password || (config.default_pass as string);
   user.role = "student";
+  user.email = payload?.email;
   const admissionSemester = await AcademicSemester.findById(
     payload.admissionSemester
   );
@@ -35,6 +42,13 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
   try {
     session.startTransaction();
     user.id = await generateStudentId(admissionSemester);
+
+    const imageName = `${user.id}-${payload?.name.firstName}`;
+    const path = file.path;
+    const imageData = await sendImageToCloudinary(path, imageName);
+    console.log(imageData);
+    payload.profileImg = imageData?.secure_url;
+
     const newUser = await User.create([user], { session }); //transaction-1
     if (!newUser.length) {
       throw new AppError(status.BAD_REQUEST, "Failed to create new user!");
@@ -60,6 +74,7 @@ const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
   const user: Partial<TUser> = {};
   user.password = password || (config.default_pass as string);
   user.role = "faculty";
+  user.email = payload?.email;
   const academicDepartment = await AcademicDepartment.findById(
     payload.academicDepartment
   );
@@ -97,6 +112,7 @@ const createAdminIntoDB = async (password: string, payload: TAdmin) => {
   const user: Partial<TUser> = {};
   user.password = password || (config.default_pass as string);
   user.role = "admin";
+  user.email = payload?.email;
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
@@ -121,8 +137,37 @@ const createAdminIntoDB = async (password: string, payload: TAdmin) => {
   }
 };
 
+const getMe = async (payload: JwtPayload) => {
+  const { userId, role } = payload;
+  let result = null;
+  if (role === "student") {
+    result = await Student.findOne({ id: userId })
+      .populate("admissionSemester")
+      .populate({
+        path: "academicDepartment",
+        populate: {
+          path: "academicFaculty",
+        },
+      });
+  }
+  if (role === "admin") {
+    result = await Admin.findOne({ id: userId }).populate("user");
+  }
+  if (role === "faculty") {
+    result = await Faculty.findOne({ id: userId }).populate("user");
+  }
+  return result;
+};
+
+const changeStatus = async (id: string, payload: { status: string }) => {
+  const result = await User.findByIdAndUpdate(id, payload, { new: true });
+  return result;
+};
+
 export const UserServices = {
   createStudentIntoDB,
   createFacultyIntoDB,
   createAdminIntoDB,
+  getMe,
+  changeStatus,
 };

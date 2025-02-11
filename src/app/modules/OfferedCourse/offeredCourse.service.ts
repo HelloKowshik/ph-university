@@ -8,6 +8,7 @@ import { AcademicFaculty } from "../AcademicFaculty/academicFaculty.model";
 import { AcademicDepartment } from "../AcademicDepartment/academicDepartment.model";
 import { Course } from "../Course/course.model";
 import { Faculty } from "../Faculty/faculty.model";
+import hasTimeConflict from "./offeredCourse.utils";
 
 const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
   const {
@@ -17,6 +18,9 @@ const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
     course,
     section,
     faculty,
+    days,
+    startTime,
+    endTime,
   } = payload;
   const isRegistrationExists = await SemesterRegistration.findById(
     semesterRegistration
@@ -80,6 +84,21 @@ const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
     throw new AppError(status.NOT_FOUND, "Faculty does not Exists!");
   }
 
+  const assignedSchedules = await OfferedCourse.find({
+    semesterRegistration,
+    faculty,
+    days: { $in: days },
+  }).select("days startTime endTime");
+
+  const newSchedule = { days, startTime, endTime };
+
+  if (hasTimeConflict(assignedSchedules, newSchedule)) {
+    throw new AppError(
+      status.CONFLICT,
+      "The faculty is not available at that schedule!"
+    );
+  }
+
   const result = await OfferedCourse.create({ ...payload, academicSemester });
   return result;
 };
@@ -94,12 +113,88 @@ const getAllOfferedCoursesFromDB = async (query: Record<string, unknown>) => {
   return result;
 };
 
-const getSingleOfferedCourseFromDB = async (id: string) => {};
+const getSingleOfferedCourseFromDB = async (id: string) => {
+  const result = await OfferedCourse.findById(id);
+  return result;
+};
 const updateOfferedCourseIntoDB = async (
   id: string,
-  payload: Partial<TOfferedCourse>
-) => {};
-const deleteOfferedCourseFromDB = async (id: string) => {};
+  payload: Pick<
+    TOfferedCourse,
+    "faculty" | "days" | "startTime" | "endTime" | "maxCapacity"
+  >
+) => {
+  const { faculty, days, startTime, endTime } = payload;
+
+  const isOfferedCourseExists = await OfferedCourse.findById(id);
+  if (!isOfferedCourseExists) {
+    throw new AppError(status.NOT_FOUND, "Offered Course does not Exists!");
+  }
+
+  const isFacultyExists = await Faculty.findById(faculty);
+  if (!isFacultyExists) {
+    throw new AppError(status.NOT_FOUND, "Faculty does not Exists!");
+  }
+
+  const semesterRegistration = isOfferedCourseExists?.semesterRegistration;
+  const isSemesterExists = await SemesterRegistration.findById(
+    semesterRegistration
+  );
+  if (!isSemesterExists) {
+    throw new AppError(
+      status.NOT_FOUND,
+      "Semester Registration does not Exists!"
+    );
+  }
+
+  const semesterStatus = isSemesterExists?.status;
+  if (semesterStatus !== "UPCOMING") {
+    throw new AppError(
+      status.BAD_REQUEST,
+      `Can not change data of ${isSemesterExists?.status} Semester`
+    );
+  }
+
+  const assignedSchedules = await OfferedCourse.find({
+    semesterRegistration,
+    faculty,
+    days: { $in: days },
+  }).select("days startTime endTime");
+
+  const newSchedule = { days, startTime, endTime };
+
+  if (hasTimeConflict(assignedSchedules, newSchedule)) {
+    throw new AppError(
+      status.CONFLICT,
+      "The faculty is not available at that schedule!"
+    );
+  }
+
+  const result = await OfferedCourse.findByIdAndUpdate(id, payload, {
+    new: true,
+  });
+  return result;
+};
+
+const deleteOfferedCourseFromDB = async (id: string) => {
+  const isOfferedCourseExists = await OfferedCourse.findById(id);
+  if (!isOfferedCourseExists) {
+    throw new AppError(status.NOT_FOUND, "Offered Course does not Exists!");
+  }
+  const semesterRegistration = isOfferedCourseExists?.semesterRegistration;
+  const semesterStatus = await SemesterRegistration.findById(
+    semesterRegistration
+  ).select("status");
+
+  if (semesterStatus?.status !== "UPCOMING") {
+    throw new AppError(
+      status.BAD_REQUEST,
+      `You Can not delete ${semesterStatus?.status} Semester`
+    );
+  }
+  const result = await OfferedCourse.findByIdAndDelete(id);
+  return result;
+};
 
 export const OfferedCourseServices = {
   createOfferedCourseIntoDB,
