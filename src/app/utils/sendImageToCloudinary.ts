@@ -15,18 +15,30 @@ export const sendImageToCloudinary = async (
     api_secret: config.cloudinary_api_secret,
   });
 
-  // Upload an image
-  const uploadResult = await cloudinary.uploader
-    .upload(path, {
+  try {
+    const uploadResult = await cloudinary.uploader.upload(path, {
       public_id: imageName,
-    })
-    .catch((error) => {
-      console.log(error);
     });
-  await unlinkAsync(path);
+    await unlinkAsync(path);
+    // console.log(`File ${path} deleted successfully.`);
+    //   console.log(uploadResult);
+    return uploadResult;
+  } catch (err: any) {
+    throw new Error(err);
+  }
+
+  // Upload an image
+  // const uploadResult = await cloudinary.uploader
+  //   .upload(path, {
+  //     public_id: imageName,
+  //   })
+  //   .catch((error) => {
+  //     console.log(error);
+  //   });
+  // await unlinkAsync(path);
   // console.log(`File ${path} deleted successfully.`);
   //   console.log(uploadResult);
-  return uploadResult;
+  // return uploadResult;
 };
 
 const storage = multer.diskStorage({
