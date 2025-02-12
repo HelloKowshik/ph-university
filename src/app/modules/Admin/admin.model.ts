@@ -3,19 +3,22 @@ import AppError from "../../errors/AppError";
 import status from "http-status";
 import { AdminModel, TAdmin, TName } from "./admin.interface";
 
-const nameSchema = new Schema<TName>({
-  firstName: {
-    type: String,
-    required: [true, "First Name is required"],
-    trim: true,
+const nameSchema = new Schema<TName>(
+  {
+    firstName: {
+      type: String,
+      required: [true, "First Name is required"],
+      trim: true,
+    },
+    middleName: { type: String },
+    lastName: {
+      type: String,
+      required: [true, "Last Name is required"],
+      trim: true,
+    },
   },
-  middleName: { type: String },
-  lastName: {
-    type: String,
-    required: [true, "Last Name is required"],
-    trim: true,
-  },
-});
+  { _id: false }
+);
 
 const adminSchema = new Schema<TAdmin, AdminModel>(
   {

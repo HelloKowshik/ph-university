@@ -9,35 +9,44 @@ import {
 import AppError from "../../errors/AppError";
 import status from "http-status";
 
-const nameSchema = new Schema<TName>({
-  firstName: {
-    type: String,
-    required: [true, "First Name is required"],
-    trim: true,
+const nameSchema = new Schema<TName>(
+  {
+    firstName: {
+      type: String,
+      required: [true, "First Name is required"],
+      trim: true,
+    },
+    middleName: { type: String },
+    lastName: {
+      type: String,
+      required: [true, "Last Name is required"],
+      trim: true,
+    },
   },
-  middleName: { type: String },
-  lastName: {
-    type: String,
-    required: [true, "Last Name is required"],
-    trim: true,
+  { _id: false }
+);
+
+const guardianInfoSchema = new Schema<TGuardian>(
+  {
+    fatherName: { type: String, required: true },
+    fatherOccupation: { type: String, required: true },
+    fatherContactNo: { type: String, required: true },
+    motherName: { type: String, required: true },
+    motherOccupation: { type: String },
+    motherContactNo: { type: String },
   },
-});
+  { _id: false }
+);
 
-const guardianInfoSchema = new Schema<TGuardian>({
-  fatherName: { type: String, required: true },
-  fatherOccupation: { type: String, required: true },
-  fatherContactNo: { type: String, required: true },
-  motherName: { type: String, required: true },
-  motherOccupation: { type: String },
-  motherContactNo: { type: String },
-});
-
-const localGuardianSchema = new Schema<TLocalGuardian>({
-  name: { type: String, required: true },
-  occupation: { type: String, required: true },
-  contactNo: { type: String, required: true },
-  address: { type: String, required: true },
-});
+const localGuardianSchema = new Schema<TLocalGuardian>(
+  {
+    name: { type: String, required: true },
+    occupation: { type: String, required: true },
+    contactNo: { type: String, required: true },
+    address: { type: String, required: true },
+  },
+  { _id: false }
+);
 
 const studentSchema = new Schema<TStudent, StudentModel>(
   {

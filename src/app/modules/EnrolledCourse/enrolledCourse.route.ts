@@ -9,7 +9,7 @@ const router = Router();
 
 router.post(
   "/create-enrolled-course",
-  auth(USER_ROLE.admin),
+  auth(USER_ROLE.student),
   validateRequest(
     EnrolledCourseValidations.createEnrolledCourseValidationSchema
   ),
