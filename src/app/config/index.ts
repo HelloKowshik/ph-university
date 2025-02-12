@@ -14,4 +14,9 @@ export default {
   jwt_access_expires_in: process.env.JWT_ACCESS_EXPIRES_IN,
   jwt_refresh_expires_in: process.env.JWT_REFRESH_EXPIRES_IN,
   front_end_link: process.env.FRONT_END_LINK,
+  cloudinary_cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  cloudinary_api_key: process.env.CLOUDINARY_API_KEY,
+  cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET,
+  node_mailer_user: process.env.NODE_MAILER_USER,
+  node_mailer_pass: process.env.NODE_MAILER_PASS,
 };

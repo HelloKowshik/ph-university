@@ -47,10 +47,10 @@ const createAdminValidationSchema = z.object({
           .string()
           .min(1, { message: "Permanent address is required" }),
         designation: z.string(),
-        profileImg: z
-          .string()
-          .url({ message: "Invalid URL format" })
-          .optional(),
+        // profileImg: z
+        //   .string()
+        //   .url({ message: "Invalid URL format" })
+        //   .optional(),
       })
       .refine((data) => data.contactNo !== data.emergencyContactNo, {
         message:
@@ -81,7 +81,7 @@ const updateAdminValidationSchema = z.object({
       .optional(),
     presentAddress: z.string().optional(),
     permanentAddress: z.string().optional(),
-    profileImg: z.string().optional(),
+    // profileImg: z.string().optional(),
     designation: z.string().optional(),
   }),
 });

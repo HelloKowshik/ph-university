@@ -146,7 +146,6 @@ const updateStudentValidationSchema = z.object({
     permanentAddress: z.string().optional(),
     guardianInfo: updateGuardianValidationSchema.optional(),
     localGuardian: updateLocalGuardianValidationSchema.optional(),
-    profileImg: z.string().optional(),
   }),
 });
 

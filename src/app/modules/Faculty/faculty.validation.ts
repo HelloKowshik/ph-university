@@ -48,10 +48,10 @@ const createFacultyValidationSchema = z.object({
           .min(1, { message: "Permanent address is required" }),
         designation: z.string(),
         academicDepartment: z.string(),
-        profileImg: z
-          .string()
-          .url({ message: "Invalid URL format" })
-          .optional(),
+        // profileImg: z
+        //   .string()
+        //   .url({ message: "Invalid URL format" })
+        //   .optional(),
       })
       .refine((data) => data.contactNo !== data.emergencyContactNo, {
         message:
@@ -83,7 +83,7 @@ const updateFacultyValidationSchema = z.object({
     presentAddress: z.string().optional(),
     permanentAddress: z.string().optional(),
     academicDepartment: z.string().optional(),
-    profileImg: z.string().optional(),
+    // profileImg: z.string().optional(),
     designation: z.string().optional(),
   }),
 });

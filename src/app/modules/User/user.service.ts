@@ -46,7 +46,6 @@ const createStudentIntoDB = async (
     const imageName = `${user.id}-${payload?.name.firstName}`;
     const path = file.path;
     const imageData = await sendImageToCloudinary(path, imageName);
-    console.log(imageData);
     payload.profileImg = imageData?.secure_url;
 
     const newUser = await User.create([user], { session }); //transaction-1
@@ -70,7 +69,11 @@ const createStudentIntoDB = async (
   }
 };
 
-const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
+const createFacultyIntoDB = async (
+  file: any,
+  password: string,
+  payload: TFaculty
+) => {
   const user: Partial<TUser> = {};
   user.password = password || (config.default_pass as string);
   user.role = "faculty";
@@ -85,6 +88,11 @@ const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
   try {
     session.startTransaction();
     user.id = await generateFacultyId();
+
+    const imageName = `${user.id}-${payload?.name.firstName}`;
+    const path = file.path;
+    const imageData = await sendImageToCloudinary(path, imageName);
+    payload.profileImg = imageData?.secure_url;
 
     const newUser = await User.create([user], { session });
     if (!newUser.length) {
@@ -108,7 +116,11 @@ const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
   }
 };
 
-const createAdminIntoDB = async (password: string, payload: TAdmin) => {
+const createAdminIntoDB = async (
+  file: any,
+  password: string,
+  payload: TAdmin
+) => {
   const user: Partial<TUser> = {};
   user.password = password || (config.default_pass as string);
   user.role = "admin";
@@ -117,6 +129,12 @@ const createAdminIntoDB = async (password: string, payload: TAdmin) => {
   try {
     session.startTransaction();
     user.id = await generateAdminId();
+
+    const imageName = `${user.id}-${payload?.name.firstName}`;
+    const path = file.path;
+    const imageData = await sendImageToCloudinary(path, imageName);
+    payload.profileImg = imageData?.secure_url;
+
     const newUser = await User.create([user], { session });
     if (!newUser.length) {
       throw new AppError(status.BAD_REQUEST, "Failed to create User");

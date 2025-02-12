@@ -1,14 +1,18 @@
 import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
+import fs from "fs";
+import { promisify } from "util";
+import config from "../config";
 
+const unlinkAsync = promisify(fs.unlink);
 export const sendImageToCloudinary = async (
   path: string,
   imageName: string
 ) => {
   cloudinary.config({
-    cloud_name: "dqilp3bge",
-    api_key: "555767335784257",
-    api_secret: "dDYejptosDmIcrkzEEMOfSr9Frg",
+    cloud_name: config.cloudinary_cloud_name,
+    api_key: config.cloudinary_api_key,
+    api_secret: config.cloudinary_api_secret,
   });
 
   // Upload an image
@@ -19,7 +23,8 @@ export const sendImageToCloudinary = async (
     .catch((error) => {
       console.log(error);
     });
-
+  await unlinkAsync(path);
+  // console.log(`File ${path} deleted successfully.`);
   //   console.log(uploadResult);
   return uploadResult;
 };
