@@ -6,6 +6,7 @@ import { Student } from "../Student/student.model";
 import { EnrolledCourse } from "./enrolledCourse.model";
 import mongoose from "mongoose";
 import { SemesterRegistration } from "../SemesterRegistration/semesterRegistration.model";
+import { Course } from "../Course/course.model";
 
 const createEnrolledCourseIntoDB = async (
   userId: string,
@@ -45,55 +46,88 @@ const createEnrolledCourseIntoDB = async (
     student: studentData?._id,
     offeredCourse: payload?.offeredCourse,
   });
+  const isCourseExists = await Course.findById(course, { _id: 0, credits: 1 });
 
   if (isStudentAlreadyEnrolled) {
     throw new AppError(status.CONFLICT, "You have already enrolled!");
   }
 
   const enrolledCourses = await EnrolledCourse.aggregate([
-    { $match: { semesterRegistration, student: studentData?._id } },
+    {
+      $match: { semesterRegistration, student: studentData?._id },
+    },
+    {
+      $lookup: {
+        from: "courses",
+        localField: "course",
+        foreignField: "_id",
+        as: "enrolledCourseData",
+      },
+    },
+    {
+      $unwind: "$enrolledCourseData",
+    },
+    {
+      $group: {
+        _id: null,
+        totalEnrolledCredits: { $sum: "$enrolledCourseData.credits" },
+      },
+    },
+    {
+      $project: { _id: 0, totalEnrolledCredits: 1 },
+    },
   ]);
-  console.log(enrolledCourses);
+  // console.log(enrolledCourses);
+  const totalCredits =
+    enrolledCourses.length > 0 ? enrolledCourses[0].totalEnrolledCredits : 0;
 
-  // const session = await mongoose.startSession();
+  if (
+    totalCredits &&
+    semesterRegistrationData?.maxCredit &&
+    totalCredits + isCourseExists?.credits > semesterRegistrationData?.maxCredit
+  ) {
+    throw new AppError(status.BAD_REQUEST, "Credit Limt exceeds!");
+  }
 
-  // try {
-  //   session.startTransaction();
-  //   const result = await EnrolledCourse.create(
-  //     [
-  //       {
-  //         semesterRegistration,
-  //         academicSemester,
-  //         academicFaculty,
-  //         academicDepartment,
-  //         isEnrolled: true,
-  //         course,
-  //         offeredCourse: payload?.offeredCourse,
-  //         student: studentData?._id,
-  //         faculty,
-  //       },
-  //     ],
-  //     { session }
-  //   );
+  const session = await mongoose.startSession();
 
-  //   if (!result) {
-  //     throw new AppError(
-  //       status.BAD_REQUEST,
-  //       "Failed to Enroll in this Course!"
-  //     );
-  //   }
-  //   await OfferedCourse.findByIdAndUpdate(payload?.offeredCourse, {
-  //     maxCapacity: maxCapacity - 1,
-  //   });
+  try {
+    session.startTransaction();
+    const result = await EnrolledCourse.create(
+      [
+        {
+          semesterRegistration,
+          academicSemester,
+          academicFaculty,
+          academicDepartment,
+          isEnrolled: true,
+          course,
+          offeredCourse: payload?.offeredCourse,
+          student: studentData?._id,
+          faculty,
+        },
+      ],
+      { session }
+    );
 
-  //   await session.commitTransaction();
-  //   await session.endSession();
-  //   return result;
-  // } catch (err: any) {
-  //   await session.abortTransaction();
-  //   await session.endSession();
-  //   throw new Error(err);
-  // }
+    if (!result) {
+      throw new AppError(
+        status.BAD_REQUEST,
+        "Failed to Enroll in this Course!"
+      );
+    }
+    await OfferedCourse.findByIdAndUpdate(payload?.offeredCourse, {
+      maxCapacity: maxCapacity - 1,
+    });
+
+    await session.commitTransaction();
+    await session.endSession();
+    return result;
+  } catch (err: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(err);
+  }
 };
 
 export const EnrolledCourseServices = {
