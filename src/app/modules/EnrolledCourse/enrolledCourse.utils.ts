@@ -1,4 +1,4 @@
-export const calculateGrade = (marks: number) => {
+export const calculateGradePoints = (marks: number) => {
   let result = {
     grade: "NA",
     gradePoints: 0,

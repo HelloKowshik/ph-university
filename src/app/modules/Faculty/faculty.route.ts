@@ -9,18 +9,23 @@ const router = Router();
 
 router.get(
   "/",
-  auth(USER_ROLE.admin, USER_ROLE.faculty),
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.faculty),
   FacultyControllers.getAllFaculties
 );
-router.get("/:facultyId", FacultyControllers.getFaculty);
+router.get(
+  "/:facultyId",
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin, USER_ROLE.faculty),
+  FacultyControllers.getFaculty
+);
 router.patch(
   "/:facultyId",
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
   validateRequest(FacultyValidations.updateFacultyValidationSchema),
   FacultyControllers.updateFaculty
 );
 router.delete(
   "/:facultyId",
-  auth(USER_ROLE.admin),
+  auth(USER_ROLE.superAdmin, USER_ROLE.admin),
   FacultyControllers.deleteFaculty
 );
 

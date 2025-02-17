@@ -47,10 +47,15 @@ const facultySchema = new Schema<TFaculty, FacultyModel>(
     permanentAddress: { type: String, required: true },
     academicDepartment: {
       type: Schema.Types.ObjectId,
-      required: [true, "Academic Depart is must"],
+      required: [true, "Academic Department is must"],
       ref: "AcademicDepartment",
     },
-    profileImg: { type: String },
+    academicFaculty: {
+      type: Schema.Types.ObjectId,
+      required: [true, "Academic Faculty is must"],
+      ref: "AcademicFaculty",
+    },
+    profileImg: { type: String, default: "" },
     isDeleted: { type: Boolean, default: false },
   },
   { toJSON: { virtuals: true } }

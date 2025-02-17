@@ -1,24 +1,25 @@
 import status from "http-status";
 import catchAsync from "../../utils/catchAsync";
-import sendRespone from "../../utils/sendResponse";
+import sendResponse from "../../utils/sendResponse";
 import { FacultyServices } from "./faculty.service";
 
 const getAllFaculties = catchAsync(async (req, res) => {
   const query = req.query;
   console.log(req.cookies);
   const result = await FacultyServices.getAllFacultiesFromDB(query);
-  sendRespone(res, {
+  sendResponse(res, {
     success: true,
     statusCode: status.OK,
     message: "Faculties Data retrive successfully",
-    data: result,
+    meta: result.meta,
+    data: result.result,
   });
 });
 
 const getFaculty = catchAsync(async (req, res) => {
   const { facultyId } = req.params;
   const result = await FacultyServices.getSingleFacultyFromDB(facultyId);
-  sendRespone(res, {
+  sendResponse(res, {
     success: true,
     statusCode: status.OK,
     message: "Faculty Data retrive successfully",
@@ -30,7 +31,7 @@ const updateFaculty = catchAsync(async (req, res) => {
   const { facultyId } = req.params;
   const { faculty } = req.body;
   const result = await FacultyServices.updateFacultyIntoDB(facultyId, faculty);
-  sendRespone(res, {
+  sendResponse(res, {
     success: true,
     statusCode: status.OK,
     message: "Faculty Data updated successfully",
@@ -41,7 +42,7 @@ const updateFaculty = catchAsync(async (req, res) => {
 const deleteFaculty = catchAsync(async (req, res) => {
   const { facultyId } = req.params;
   const result = await FacultyServices.deleteFacultyFromDB(facultyId);
-  sendRespone(res, {
+  sendResponse(res, {
     success: true,
     statusCode: status.OK,
     message: "Faculty deleted successfully",

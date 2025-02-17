@@ -8,6 +8,8 @@ import mongoose from "mongoose";
 import { SemesterRegistration } from "../SemesterRegistration/semesterRegistration.model";
 import { Course } from "../Course/course.model";
 import { Faculty } from "../Faculty/faculty.model";
+import { calculateGradePoints } from "./enrolledCourse.utils";
+import QueryBuilder from "../../builder/QueryBuilder";
 
 const createEnrolledCourseIntoDB = async (
   userId: string,
@@ -131,6 +133,52 @@ const createEnrolledCourseIntoDB = async (
   }
 };
 
+const getAllEnrolledCoursesFromDB = async (
+  facultyId: string,
+  query: Record<string, unknown>
+) => {
+  const faculty = await Faculty.findOne({ id: facultyId });
+  if (!faculty) {
+    throw new AppError(status.NOT_FOUND, "Faculty not found!");
+  }
+  const enrolledCourseQuery = new QueryBuilder(
+    EnrolledCourse.find({ faculty: faculty._id }).populate(
+      "semesterRegistration academicSemester academicFaculty academicDepartment offeredCourse course student faculty"
+    ),
+    query
+  )
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+  const result = await enrolledCourseQuery.modelQuery;
+  const meta = await enrolledCourseQuery.countTotal();
+  return { meta, result };
+};
+
+const getMyEnrolledCoursesFromDB = async (
+  studentId: string,
+  query: Record<string, unknown>
+) => {
+  const student = await Student.findOne({ id: studentId });
+  if (!student) {
+    throw new AppError(status.NOT_FOUND, "Student not found!");
+  }
+  const studentQuery = new QueryBuilder(
+    EnrolledCourse.find({ student: student?._id }).populate(
+      "semesterRegistration academicSemester academicFaculty academicDepartment offeredCourse course student faculty"
+    ),
+    query
+  )
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+  const result = await studentQuery.modelQuery;
+  const meta = await studentQuery.countTotal();
+  return { meta, result };
+};
+
 const updateEnrolledCourseMarksIntoDB = async (
   facultyId: string,
   payload: Partial<TEnrolledCourse>
@@ -171,18 +219,21 @@ const updateEnrolledCourseMarksIntoDB = async (
       "You are not authorized to this course!"
     );
   }
-
+  const modifiedData: Record<string, unknown> = { ...courseMarks };
   if (courseMarks?.finalTerm) {
     const { classTest1, midTerm, classTest2, finalTerm } =
       isCourseBelongsToFaculty?.courseMarks;
     const totalMarks =
-      Math.ceil(classTest1 * 0.1) +
-      Math.ceil(midTerm * 0.3) +
-      Math.ceil(classTest2 * 0.1) +
-      Math.ceil(finalTerm * 0.5);
+      Math.ceil(classTest1) +
+      Math.ceil(midTerm) +
+      Math.ceil(classTest2) +
+      Math.ceil(finalTerm);
+    const finalGrade = calculateGradePoints(totalMarks);
+    modifiedData.grade = finalGrade.grade;
+    modifiedData.gradePoints = finalGrade.gradePoints;
+    modifiedData.isCompleted = true;
   }
 
-  const modifiedData: Record<string, unknown> = { ...courseMarks };
   if (courseMarks && Object.keys(courseMarks).length > 0) {
     for (let [key, value] of Object.entries(courseMarks)) {
       modifiedData[`courseMarks.${key}`] = value;
@@ -199,4 +250,6 @@ const updateEnrolledCourseMarksIntoDB = async (
 export const EnrolledCourseServices = {
   createEnrolledCourseIntoDB,
   updateEnrolledCourseMarksIntoDB,
+  getAllEnrolledCoursesFromDB,
+  getMyEnrolledCoursesFromDB,
 };

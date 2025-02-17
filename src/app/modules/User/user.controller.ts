@@ -1,5 +1,5 @@
 import { UserServices } from "./user.service";
-import sendRespone from "../../utils/sendResponse";
+import sendResponse from "../../utils/sendResponse";
 import status from "http-status";
 import catchAsync from "../../utils/catchAsync";
 
@@ -10,7 +10,7 @@ const createStudent = catchAsync(async (req, res) => {
     password,
     student
   );
-  sendRespone(res, {
+  sendResponse(res, {
     success: true,
     statusCode: status.OK,
     message: "Student created successfully",
@@ -25,7 +25,7 @@ const createFaculty = catchAsync(async (req, res) => {
     password,
     faculty
   );
-  sendRespone(res, {
+  sendResponse(res, {
     success: true,
     statusCode: status.OK,
     message: "Faculty created successfully",
@@ -40,7 +40,7 @@ const createAdmin = catchAsync(async (req, res) => {
     password,
     admin
   );
-  sendRespone(res, {
+  sendResponse(res, {
     success: true,
     statusCode: status.OK,
     message: "Admin created successfully",
@@ -50,7 +50,7 @@ const createAdmin = catchAsync(async (req, res) => {
 
 const getMe = catchAsync(async (req, res) => {
   const result = await UserServices.getMe(req.user);
-  sendRespone(res, {
+  sendResponse(res, {
     success: true,
     statusCode: status.OK,
     message: "Data retrived successfully",
@@ -61,7 +61,7 @@ const getMe = catchAsync(async (req, res) => {
 const changeStatus = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await UserServices.changeStatus(id, req.body);
-  sendRespone(res, {
+  sendResponse(res, {
     success: true,
     statusCode: status.OK,
     message: "Status changes successfully",

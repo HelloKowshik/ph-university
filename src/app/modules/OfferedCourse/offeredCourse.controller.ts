@@ -1,13 +1,13 @@
 import status from "http-status";
 import catchAsync from "../../utils/catchAsync";
-import sendRespone from "../../utils/sendResponse";
+import sendResponse from "../../utils/sendResponse";
 import { OfferedCourseServices } from "./offeredCourse.service";
 
 const createOfferedCourse = catchAsync(async (req, res) => {
   const result = await OfferedCourseServices.createOfferedCourseIntoDB(
     req.body
   );
-  sendRespone(res, {
+  sendResponse(res, {
     success: true,
     statusCode: status.OK,
     message: "Offered Course created successfully",
@@ -19,7 +19,7 @@ const getAllOfferedCourses = catchAsync(async (req, res) => {
   const result = await OfferedCourseServices.getAllOfferedCoursesFromDB(
     req.query
   );
-  sendRespone(res, {
+  sendResponse(res, {
     success: true,
     statusCode: status.OK,
     message: "Offered Courses retrived successfully",
@@ -32,7 +32,7 @@ const getOfferedCourse = catchAsync(async (req, res) => {
   const result = await OfferedCourseServices.getSingleOfferedCourseFromDB(
     offeredId
   );
-  sendRespone(res, {
+  sendResponse(res, {
     success: true,
     statusCode: status.OK,
     message: "Offered Course retrived successfully",
@@ -46,7 +46,7 @@ const updateOfferedCourse = catchAsync(async (req, res) => {
     offeredId,
     req.body
   );
-  sendRespone(res, {
+  sendResponse(res, {
     success: true,
     statusCode: status.OK,
     message: "Offered Course updated successfully",
@@ -59,10 +59,24 @@ const deleteOfferedCourse = catchAsync(async (req, res) => {
   const result = await OfferedCourseServices.deleteOfferedCourseFromDB(
     offeredId
   );
-  sendRespone(res, {
+  sendResponse(res, {
     success: true,
     statusCode: status.OK,
     message: "Offered Course deleted successfully",
+    data: result,
+  });
+});
+
+const myOfferedCourses = catchAsync(async (req, res) => {
+  const userId = req.user.userId;
+  const result = await OfferedCourseServices.getMyOfferedCoursesFromDB(
+    userId,
+    req.query
+  );
+  sendResponse(res, {
+    success: true,
+    statusCode: status.OK,
+    message: "Offered Courses retrived successfully",
     data: result,
   });
 });
@@ -73,4 +87,5 @@ export const OfferedCourseControllers = {
   getOfferedCourse,
   updateOfferedCourse,
   deleteOfferedCourse,
+  myOfferedCourses,
 };

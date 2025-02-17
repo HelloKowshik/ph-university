@@ -94,10 +94,6 @@ const createStudentValidationSchema = z.object({
           .min(1, { message: "Permanent address is required" }),
         guardianInfo: createGuardianValidationSchema,
         localGuardian: createLocalGuardianValidationSchema,
-        //   profileImg: z
-        //     .string()
-        //     .url({ message: "Invalid URL format" })
-        //     .optional(),
       })
       .refine((data) => data.contactNo !== data.emergencyContactNo, {
         message:

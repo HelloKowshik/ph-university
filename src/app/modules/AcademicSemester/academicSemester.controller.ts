@@ -1,4 +1,4 @@
-import sendRespone from "../../utils/sendResponse";
+import sendResponse from "../../utils/sendResponse";
 import status from "http-status";
 import catchAsync from "../../utils/catchAsync";
 import { AcademicSemesterServices } from "./academicSemester.service";
@@ -7,7 +7,7 @@ const createAcademicSemester = catchAsync(async (req, res) => {
   const result = await AcademicSemesterServices.createAcademicSemesterIntoDB(
     req.body
   );
-  sendRespone(res, {
+  sendResponse(res, {
     success: true,
     statusCode: status.OK,
     message: "Academic Semester created successfully",
@@ -17,7 +17,7 @@ const createAcademicSemester = catchAsync(async (req, res) => {
 
 const getAllAcademicSemesters = catchAsync(async (req, res) => {
   const result = await AcademicSemesterServices.getAllAcademicSemesterFromDB();
-  sendRespone(res, {
+  sendResponse(res, {
     success: true,
     statusCode: status.OK,
     message: "Semester Data retrived successfully",
@@ -30,7 +30,7 @@ const getSingleAcademicSemester = catchAsync(async (req, res) => {
   const result = await AcademicSemesterServices.getSingleAcademicSemesterFromDB(
     semesterId
   );
-  sendRespone(res, {
+  sendResponse(res, {
     success: true,
     statusCode: status.OK,
     message: "Semester Data retrived successfully",
@@ -44,7 +44,7 @@ const updateAcademicSemester = catchAsync(async (req, res) => {
     semesterId,
     req.body
   );
-  sendRespone(res, {
+  sendResponse(res, {
     success: true,
     statusCode: status.OK,
     message: "Semester Data updated successfully",

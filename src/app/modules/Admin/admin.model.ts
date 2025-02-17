@@ -45,7 +45,7 @@ const adminSchema = new Schema<TAdmin, AdminModel>(
     },
     presentAddress: { type: String, required: true },
     permanentAddress: { type: String, required: true },
-    profileImg: { type: String },
+    profileImg: { type: String, default: "" },
     isDeleted: { type: Boolean, default: false },
   },
   { toJSON: { virtuals: true } }

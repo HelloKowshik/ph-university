@@ -150,7 +150,6 @@ const forgetPassword = async (id: string) => {
   );
   const resetUILink = `${config.front_end_link}?id=${isUserExists?.id}&token=${resetToken}`;
   sendEmail(isUserExists.email, resetUILink);
-  console.log(isUserExists.email, resetUILink);
 };
 
 const resetPassword = async (
